@@ -1,0 +1,102 @@
+-- Projects Table
+CREATE OR REPLACE TABLE projects (
+    project_id STRING,
+    managed_by STRING,
+    product_group STRING,
+    fulfill_via STRING,
+    pq_first_sent_to_client_date VARCHAR,
+    sub_classification STRING
+);
+
+-- Insert data into projects table
+INSERT INTO projects (project_id, managed_by, product_group, fulfill_via, pq_first_sent_to_client_date, sub_classification)
+SELECT
+    project_code AS project_id,
+    managed_by,
+    product_group,
+    fulfill_via,
+    pq_first_sent_to_client_date,
+    sub_classification
+FROM HEALTH_COMMODITY;
+
+-- Orders Table
+CREATE OR REPLACE TABLE orders (
+    order_id STRING,
+    asn_dn STRING,
+    shipment_mode STRING,
+    scheduled_delivery_date DATE,
+    actual_delivery_date DATE,
+    delivery_recorded_date DATE
+);
+
+
+-- Insert data into orders table
+INSERT INTO orders (order_id, asn_dn, shipment_mode, scheduled_delivery_date, actual_delivery_date, delivery_recorded_date)
+SELECT
+    po_so AS order_id,
+    asn_dn,
+    shipment_mode,
+    TO_DATE(scheduled_delivery_date) AS scheduled_delivery_date,
+    TO_DATE(delivered_to_client_date) AS actual_delivery_date,
+    TO_DATE(delivery_recorded_date) AS delivery_recorded_date
+FROM HEALTH_COMMODITY;
+
+
+-- Products Table
+CREATE OR REPLACE TABLE products (
+    product_id STRING,
+    item_description STRING,
+    dosage STRING,
+    unit_of_measure INT,
+    line_item_quantity INT,
+    weight VARCHAR,
+    pack_price FLOAT,
+    unit_price FLOAT,
+    line_item_insurance_usd FLOAT
+    
+);
+
+-- Insert data into products table
+INSERT INTO products (product_id, item_description, dosage, unit_of_measure, line_item_quantity, weight, pack_price, unit_price, line_item_insurance_usd)
+SELECT
+    item_description AS product_id,
+    item_description,
+    dosage,
+    unit_of_measure_per_pack AS unit_of_measure,
+    line_item_quantity,
+    weight_kilograms AS weight,
+    pack_price,
+    unit_price,
+    line_item_insurance_usd
+FROM HEALTH_COMMODITY;
+
+
+-- Vendor Table
+CREATE OR REPLACE TABLE vendors (
+    vendor_name STRING,
+    manufacturing_site STRING
+);
+
+-- Insert data into vendors table
+INSERT INTO vendors (vendor_name, manufacturing_site)
+SELECT
+    vendor,
+    manufacturing_site
+FROM HEALTH_COMMODITY;
+
+-- Logistics Table
+CREATE OR REPLACE TABLE logistics (
+    order_id STRING,
+    freight_cost VARCHAR,
+    shipment_mode STRING,
+    delivery_recorded_date DATE
+);
+
+-- Insert data into logistics table
+INSERT INTO logistics (order_id, freight_cost, shipment_mode, delivery_recorded_date)
+SELECT
+    po_so AS order_id,
+    freight_cost_usd AS freight_cost,
+    shipment_mode,
+    delivery_recorded_date
+FROM HEALTH_COMMODITY;
